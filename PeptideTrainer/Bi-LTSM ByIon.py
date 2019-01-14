@@ -11,11 +11,12 @@ in double the number of outputs to the next layer, as the forward and backward
 outputs are merged into a larger matrix"""
 
 # file location, update for different users.
-fileLocation = '/Users/nicolaschapman/Documents/UROP/Machine Leaning/Data/'
+fileLocation = "C:/Users/Arpit/Desktop/MasterUROP/IonTraining/PeptideTrainer/"
 
 # read the data created by processByIonData.py into numpy arrays which are can be fed into the neural net.
-with open(fileLocation + 'Network Data.csv') as csv_file:
+with open(fileLocation + 'Network Data old.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter = ',')
+    next(csv_reader, None)
     # initialise output list
     inputData = []
     outputData = []
@@ -23,37 +24,35 @@ with open(fileLocation + 'Network Data.csv') as csv_file:
     peptideInput = []
     peptideOutput = []
     for row in csv_reader:
-        # skip the first peptide header in the csv
-        if row[0] == 'Peptide 1':
-            continue
-        # when we reach a new peptide, append the peptideInput and peptideOutput to inputData and outputData
-        if row[0][0:7] == "Peptide":
-            timeSteps = len(peptideInput)
-            # if the number of cleave sites (timesteps) is less than the max of 12 (as per a 15 amino peptide)
-            # we need to pad peptideInput/Output with zero vectors for the remaining timesteps.
-            if timeSteps != 12:
-                for i in range(0, 12 - timeSteps):
-                    inputPad = np.zeros(427)
-                    outputPad = np.zeros(2)
-                    peptideInput.append(inputPad)
-                    peptideOutput.append(outputPad)
-            # convert the peptideInput/Output to an array before it is added to input/outputData
-            inputArray = np.array(peptideInput)
-            inputData.append(inputArray)
-            outputArray = np.array(peptideOutput)
-            outputData.append(outputArray)
-            peptideInput = []
-            peptideOutput = []
-            continue
-        # rows in the csv have an input entry, then a corresponding output entry in the row after. We thus need
-        # to differentiate b/w input and output entries and add them to the correct list.
-        if len(row) == 2:
-            # convert row to an array before it is appended to the relevant list.
-            output = np.array([float(x) for x in row])
-            peptideOutput.append(output)
-        else:
-            input = np.array([float(x) for x in row])
-            peptideInput.append(input)
+        if row:
+            # when we reach a new peptide, append the peptideInput and peptideOutput to inputData and outputData
+            if row[0][0:7] == "Peptide":
+                timeSteps = len(peptideInput)
+                # if the number of cleave sites (timesteps) is less than the max of 12 (as per a 15 amino peptide)
+                # we need to pad peptideInput/Output with zero vectors for the remaining timesteps.
+                if timeSteps != 12:
+                    for i in range(0, 12 - timeSteps):
+                        inputPad = np.zeros(427)
+                        outputPad = np.zeros(2)
+                        peptideInput.append(inputPad)
+                        peptideOutput.append(outputPad)
+                # convert the peptideInput/Output to an array before it is added to input/outputData
+                inputArray = np.array(peptideInput)
+                inputData.append(inputArray)
+                outputArray = np.array(peptideOutput)
+                outputData.append(outputArray)
+                peptideInput = []
+                peptideOutput = []
+                continue
+            # rows in the csv have an input entry, then a corresponding output entry in the row after. We thus need
+            # to differentiate b/w input and output entries and add them to the correct list.
+            if len(row) == 2:
+                # convert row to an array before it is appended to the relevant list.
+                output = np.array([float(x) for x in row])
+                peptideOutput.append(output)
+            else:
+                input = np.array([float(x) for x in row])
+                peptideInput.append(input)
 # convert input/outputData to a numpy array.
 inputArray = np.array(inputData)
 print(inputArray)
@@ -103,7 +102,7 @@ model.compile(optimizer='adam', loss='binary_crossentropy', metrics = ['acc'])
 # Produce 1000 sequences and train over 20 epochs with a mini-batch size of 50
 # verbose param sets how information regarding epoch progression is presented in
 # the console.
-model.fit(trainInput,trainOutput, epochs=20, batch_size=10, verbose=2)
+model.fit(trainInput,trainOutput, epochs=60, batch_size=10, verbose=2)
 
 # evaluate LTSM
 testData = zip(testInput, testOutput)
